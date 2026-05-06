@@ -8,9 +8,9 @@
 
 - [x] `cargo new rgit --bin`, set up `clap` for CLI args
 - [x] `rgit init` → create `working/` and `.rgit/` dirs
-- [ ] `rgit snapshot "msg"` → copy `working/` to `.rgit/snapshots/snapshot-N`
-- [ ] Write a `message` file inside the snapshot with timestamp + message text
-- [ ] `rgit log` → print each snapshot's message file in reverse order
+- [x] `rgit snapshot "msg"` → copy `working/` to `.rgit/snapshots/snapshot-N`
+- [x] Write a `message` file inside the snapshot with timestamp + message text
+- [x] `rgit log` → print each snapshot's message file in reverse order
 
 ---
 
