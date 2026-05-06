@@ -1,4 +1,5 @@
 mod commands;
+mod core;
 mod errors;
 
 use clap::{Parser, Subcommand};
@@ -8,6 +9,7 @@ use std::path::PathBuf;
 #[derive(Subcommand)]
 pub enum Commands {
     Init,
+    Log,
     Add {
         files: Vec<String>,
     },
@@ -48,6 +50,11 @@ fn main() {
                 }
                 Commands::Commit { message } => {
                     if let Err(err) = repo.commit(message) {
+                        eprintln!("{}", err)
+                    }
+                }
+                Commands::Log => {
+                    if let Err(err) = repo.log() {
                         eprintln!("{}", err)
                     }
                 }
