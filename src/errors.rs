@@ -8,6 +8,7 @@ pub enum RgitError {
     Io(io::Error),
     NotInitialized,
     CreatingFolder(PathBuf, Box<dyn Error>),
+    MessageFileNotFound,
     RootFolderInstallation(Box<dyn Error>),
 }
 
@@ -28,6 +29,9 @@ impl fmt::Display for RgitError {
             }
             RgitError::RootFolderInstallation(err) => {
                 write!(f, "Fatal: Cannot create .rgit directory\nError: {}", err)
+            }
+            RgitError::MessageFileNotFound => {
+                write!(f, "Fatal: Message file not found")
             }
         }
     }
