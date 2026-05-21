@@ -16,8 +16,11 @@
 
 ## Phase 02 — Branches
 
-- [ ] Add a `parent: snapshot-N` line to each new message file
-- [ ] Maintain a `branches` file: `<branch-name> <snapshot-N>`
+- [x] Add a `parent: snapshot-N` line to each new message file
+- [x] Maintain a `branches` file: `<branch-name> <snapshot-N>`
+  - [x] Need a branch head file to track current branch
+  - [x] Need to track which all branches exists
+  - [x] Need messages for each branch
 - [ ] `rgit branch <name>` → create new branch pointing at current snapshot
 - [ ] `rgit checkout <name>` → copy that snapshot into `working/`
 - [ ] Update the active branch pointer after every new snapshot

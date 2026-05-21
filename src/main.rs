@@ -34,15 +34,15 @@ fn main() {
     if cli.debug {
         println!("Debug mode is on");
     }
+    let mut repo = Repository::new(PathBuf::from("."));
     match &cli.command {
         Commands::Init => {
-            let repo = Repository::new(PathBuf::from("."));
             if let Err(err) = repo.init() {
                 eprintln!("{}", err)
             }
         }
-        _ => match Repository::find() {
-            Ok(repo) => match cli.command {
+        _ => match repo.find() {
+            Ok(_) => match cli.command {
                 Commands::Add { files } => {
                     if let Err(err) = repo.add(files) {
                         eprintln!("{}", err)
