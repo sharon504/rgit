@@ -9,6 +9,11 @@ pub enum RgitError {
     BranchAlreadyExists(String),
     BranchNotFound(String),
     CommitNotFound,
+    TagAlreadyExists(String),
+    AmbiguousReference(String),
+    RefNotFound(String),
+    TagNotFound(String),
+    NotInBranch,
 }
 
 impl fmt::Display for RgitError {
@@ -29,6 +34,25 @@ impl fmt::Display for RgitError {
             }
             RgitError::CommitNotFound => {
                 writeln!(f, "Fatal: branch commit doesn't exists")
+            }
+            RgitError::TagAlreadyExists(name) => {
+                writeln!(f, "Fatal: {name} tag already exists")
+            }
+            RgitError::AmbiguousReference(name) => {
+                writeln!(
+                    f,
+                    "Fatal: '{}' is both a branch and a tag. Please use 'refs/heads/{}' or 'refs/tags/{}'",
+                    name, name, name
+                )
+            }
+            RgitError::RefNotFound(name) => {
+                writeln!(f, "Fatal: reference '{}' not found", name)
+            }
+            RgitError::TagNotFound(name) => {
+                writeln!(f, "Fatal: tag {name} not found")
+            }
+            RgitError::NotInBranch => {
+                writeln!(f, "Fatal: cannot commit in a non-branch state")
             }
         }
     }
