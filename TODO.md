@@ -16,28 +16,31 @@
 
 ## Phase 02 — Branches
 
-- [ ] Add a `parent: snapshot-N` line to each new message file
-- [ ] Maintain a `branches` file: `<branch-name> <snapshot-N>`
-- [ ] `rgit branch <name>` → create new branch pointing at current snapshot
-- [ ] `rgit checkout <name>` → copy that snapshot into `working/`
-- [ ] Update the active branch pointer after every new snapshot
+- [x] Add a `parent: snapshot-N` line to each new message file
+- [x] Maintain a `branches` file: `<branch-name> <snapshot-N>`
+  - [x] Need a branch head file to track current branch
+  - [x] Need to track which all branches exists
+  - [x] Need messages for each branch
+- [x] `rgit branch <name>` → create new branch pointing at current snapshot
+- [x] `rgit checkout <name>` → copy that snapshot into `working/`
+- [x] Update the active branch pointer after every new snapshot
 
 ---
 
 ## Phase 03 — Tags
 
-- [ ] Maintain a `tags` file: `<tag-name> <snapshot-N>`
-- [ ] `rgit tag <name>` → write current snapshot to tags file
-- [ ] Tag checkout is read-only — does not move the pointer
+- [x] Maintain a `tags` file: `<tag-name> <snapshot-N>`
+- [x] `rgit tag <name>` → write current snapshot to tags file
+- [x] Tag checkout is read-only — does not move the pointer
 
 ---
 
 ## Phase 04 — SHA1 Naming
 
-- [ ] Add `sha1` or `sha2` crate
-- [ ] Hash `author + date + parent_sha + message` to get the snapshot name
-- [ ] Replace sequential `snapshot-N` naming with the SHA1 hex everywhere
-- [ ] Update branches and tags files to reference SHAs
+- [x] Add `sha1` or `sha2` crate
+- [x] Hash `author + date + parent_sha + message` to get the snapshot name
+- [x] Replace sequential `snapshot-N` naming with the SHA1 hex everywhere
+- [x] Update branches and tags files to reference SHAs
 
 ---
 

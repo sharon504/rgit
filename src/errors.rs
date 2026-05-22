@@ -1,37 +1,62 @@
-use std::error::Error;
 use std::fmt;
 use std::io;
-use std::path::PathBuf;
 
 #[derive(Debug)]
 pub enum RgitError {
     Io(io::Error),
-    NotInitialized,
-    CreatingFolder(PathBuf, Box<dyn Error>),
+    NotInitialized(String),
     MessageFileNotFound,
-    RootFolderInstallation(Box<dyn Error>),
+    BranchAlreadyExists(String),
+    BranchNotFound(String),
+    CommitNotFound,
+    TagAlreadyExists(String),
+    AmbiguousReference(String),
+    RefNotFound(String),
+    TagNotFound(String),
+    NotInBranch,
+    ConfigError,
 }
 
 impl fmt::Display for RgitError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            RgitError::Io(err) => write!(f, "IO Error: {}", err),
-            RgitError::NotInitialized => write!(
-                f,
-                "Fatal: Not a rgit repository (or any of the parent directories): .rgit"
-            ),
-            RgitError::CreatingFolder(dir, err) => {
-                write!(
-                    f,
-                    "Fatal: Cannot create directory: {:?}\nError: {}",
-                    dir, err
-                )
-            }
-            RgitError::RootFolderInstallation(err) => {
-                write!(f, "Fatal: Cannot create .rgit directory\nError: {}", err)
+            RgitError::Io(err) => writeln!(f, "IO Error: {}", err),
+            RgitError::NotInitialized(s) => {
+                writeln!(f, "Fatal: Not a rgit repository({} not found)", s)
             }
             RgitError::MessageFileNotFound => {
-                write!(f, "Fatal: Message file not found")
+                writeln!(f, "Fatal: Message file not found")
+            }
+            RgitError::BranchAlreadyExists(name) => {
+                writeln!(f, "Fatal: {name} branch already exists")
+            }
+            RgitError::BranchNotFound(name) => {
+                writeln!(f, "Fatal: branch {name} doesn't exists")
+            }
+            RgitError::CommitNotFound => {
+                writeln!(f, "Fatal: branch commit doesn't exists")
+            }
+            RgitError::TagAlreadyExists(name) => {
+                writeln!(f, "Fatal: {name} tag already exists")
+            }
+            RgitError::AmbiguousReference(name) => {
+                writeln!(
+                    f,
+                    "Fatal: '{}' is both a branch and a tag. Please use 'refs/heads/{}' or 'refs/tags/{}'",
+                    name, name, name
+                )
+            }
+            RgitError::RefNotFound(name) => {
+                writeln!(f, "Fatal: reference '{}' not found", name)
+            }
+            RgitError::TagNotFound(name) => {
+                writeln!(f, "Fatal: tag {name} not found")
+            }
+            RgitError::NotInBranch => {
+                writeln!(f, "Fatal: cannot commit in a non-branch state")
+            }
+            RgitError::ConfigError => {
+                writeln!(f, "Fatal: Config loading error")
             }
         }
     }

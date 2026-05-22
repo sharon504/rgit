@@ -1,9 +1,5 @@
-mod commands;
-mod core;
-mod errors;
-
 use clap::{Parser, Subcommand};
-use commands::Repository;
+use rgit_lib::commands::Repository;
 use std::path::PathBuf;
 
 #[derive(Subcommand)]
@@ -16,6 +12,19 @@ pub enum Commands {
     Commit {
         #[arg(short, long)]
         message: String,
+    },
+    Branch {
+        name: String,
+    },
+    Checkout {
+        name: String,
+    },
+    Tag {
+        name: String,
+    },
+    Config {
+        key: String,
+        value: Option<String>,
     },
 }
 
@@ -34,15 +43,15 @@ fn main() {
     if cli.debug {
         println!("Debug mode is on");
     }
+    let mut repo = Repository::new(PathBuf::from("."));
     match &cli.command {
         Commands::Init => {
-            let repo = Repository::new(PathBuf::from("."));
             if let Err(err) = repo.init() {
                 eprintln!("{}", err)
             }
         }
-        _ => match Repository::find() {
-            Ok(repo) => match cli.command {
+        _ => match repo.find() {
+            Ok(_) => match cli.command {
                 Commands::Add { files } => {
                     if let Err(err) = repo.add(files) {
                         eprintln!("{}", err)
@@ -56,6 +65,26 @@ fn main() {
                 Commands::Log => {
                     if let Err(err) = repo.log() {
                         eprintln!("{}", err)
+                    }
+                }
+                Commands::Branch { name } => {
+                    if let Err(e) = repo.branch(name) {
+                        eprintln!("{}", e);
+                    }
+                }
+                Commands::Checkout { name } => {
+                    if let Err(e) = repo.checkout(name) {
+                        eprint!("{e}");
+                    }
+                }
+                Commands::Tag { name } => {
+                    if let Err(e) = repo.tag(name) {
+                        eprintln!("{e}");
+                    }
+                }
+                Commands::Config { key, value } => {
+                    if let Err(e) = repo.config(key, value) {
+                        eprintln!("{e}")
                     }
                 }
                 _ => unreachable!(),
