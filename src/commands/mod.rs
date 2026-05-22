@@ -1,5 +1,8 @@
+use clap::error::Result;
+
 use crate::{
     commands::{
+        config::Config,
         fs_ops::FsOps,
         init::InitOps,
         log_ops::LogOps,
@@ -13,6 +16,7 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+pub mod config;
 pub mod constants;
 pub mod fs_ops;
 pub mod init;
@@ -29,21 +33,28 @@ pub struct Repository {
     pub branches: PathBuf,
     pub tags: PathBuf,
     pub current_branch: PathBuf,
+    pub config: Config,
 }
 
 impl Repository {
     /// Create a new repository instance
     pub fn new(path: PathBuf) -> Self {
         let root = path.join(".rgit");
+
+        let config = Config::load(root.join("config").as_path());
+        if config.is_err() {
+            eprintln!("{}", RgitError::ConfigError);
+        }
         Self {
             gitdir: root.clone(),
-            objects: root.clone().join("objects"),
-            head_file: root.clone().join("HEAD"),
-            log_head: root.clone().join("logs/HEAD"),
-            logs: root.clone().join("logs/"),
-            branches: root.clone().join("refs/heads/"),
-            tags: root.clone().join("refs/tags/"),
+            objects: root.join("objects"),
+            head_file: root.join("HEAD"),
+            log_head: root.join("logs/HEAD"),
+            logs: root.join("logs/"),
+            branches: root.join("refs/heads/"),
+            tags: root.join("refs/tags/"),
             current_branch: PathBuf::new(),
+            config: config.unwrap(),
         }
     }
 
@@ -79,19 +90,17 @@ impl Repository {
         if self.current_branch.as_path().as_os_str().is_empty() {
             return Err(RgitError::NotInBranch);
         }
-        let n = Utils::next_snapshot_index()? + 1;
-        Utils::copy_dir(
-            Path::new(constants::WORKDIR),
-            self.objects.join(format!("snap-{}", n)).as_path(),
-        )?;
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let parent = format!("snap-{}", n - 1);
-        let child = format!("snap-{}", n);
+        let parent = RefOps::get_current_commit_hash(self)?;
 
-        LogOps::write_commit_log(child.clone(), parent, timestamp, message, self)?;
+        let child = LogOps::write_commit_log(parent, timestamp, message, self)?;
+        Utils::copy_dir(
+            Path::new(constants::WORKDIR),
+            self.objects.join(&child).as_path(),
+        )?;
 
         // Update branch pointer to point to new commit
         let normalized_branch = FsOps::normalize_path(&self.current_branch);
@@ -175,6 +184,34 @@ impl Repository {
             return Err(RgitError::TagAlreadyExists(name));
         }
         FsOps::create_file_with_content(tag_dir.as_path(), current_commit.as_bytes())?;
+        Ok(())
+    }
+
+    /// Configuration commands
+    pub fn config(&mut self, key: String, value: Option<String>) -> Result<(), RgitError> {
+        let config_file = self.gitdir.join("config");
+        match value {
+            Some(value) => {
+                match key.as_str() {
+                    "user.name" => {
+                        let _ = self.config.user_name(value)?;
+                    }
+                    "user.email" => {
+                        let _ = self.config.user_email(value)?;
+                    }
+                    _ => {
+                        eprintln!("Unknown configuration key: {}", key);
+                        return Ok(());
+                    }
+                }
+                self.config.set(config_file.as_path())?;
+            }
+            None => match key.as_str() {
+                "user.name" => println!("{}", self.config.get_user_name()?),
+                "user.email" => println!("{}", self.config.get_user_email()?),
+                _ => eprintln!("Unknown configuration key: {}", key),
+            },
+        };
         Ok(())
     }
 }
