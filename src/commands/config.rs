@@ -37,7 +37,6 @@ impl Config {
         })
     }
 
-    #[allow(dead_code)]
     pub fn new(user_name: &str, user_email: &str) -> Self {
         Self {
             _user_name: user_name.to_string(),

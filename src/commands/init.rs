@@ -64,7 +64,6 @@ impl InitOps {
     }
 
     /// Check if a repository already exists
-    #[allow(dead_code)]
     pub fn repo_exists(repo: &Repository) -> bool {
         FsOps::path_exists(&repo.gitdir)
             && FsOps::path_exists(&repo.objects)
