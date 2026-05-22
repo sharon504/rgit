@@ -29,9 +29,9 @@
 
 ## Phase 03 — Tags
 
-- [ ] Maintain a `tags` file: `<tag-name> <snapshot-N>`
-- [ ] `rgit tag <name>` → write current snapshot to tags file
-- [ ] Tag checkout is read-only — does not move the pointer
+- [x] Maintain a `tags` file: `<tag-name> <snapshot-N>`
+- [x] `rgit tag <name>` → write current snapshot to tags file
+- [x] Tag checkout is read-only — does not move the pointer
 
 ---
 
