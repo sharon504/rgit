@@ -14,6 +14,7 @@ pub enum RgitError {
     RefNotFound(String),
     TagNotFound(String),
     NotInBranch,
+    ConfigError,
 }
 
 impl fmt::Display for RgitError {
@@ -53,6 +54,9 @@ impl fmt::Display for RgitError {
             }
             RgitError::NotInBranch => {
                 writeln!(f, "Fatal: cannot commit in a non-branch state")
+            }
+            RgitError::ConfigError => {
+                writeln!(f, "Fatal: Config loading error")
             }
         }
     }
