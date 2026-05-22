@@ -21,9 +21,9 @@
   - [x] Need a branch head file to track current branch
   - [x] Need to track which all branches exists
   - [x] Need messages for each branch
-- [ ] `rgit branch <name>` → create new branch pointing at current snapshot
-- [ ] `rgit checkout <name>` → copy that snapshot into `working/`
-- [ ] Update the active branch pointer after every new snapshot
+- [x] `rgit branch <name>` → create new branch pointing at current snapshot
+- [x] `rgit checkout <name>` → copy that snapshot into `working/`
+- [x] Update the active branch pointer after every new snapshot
 
 ---
 

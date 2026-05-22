@@ -5,7 +5,7 @@ use crate::{
 };
 use chrono::{Local, TimeZone};
 use std::{
-    fs,
+    fs::{self, OpenOptions},
     io::Write,
     os::unix::ffi::OsStrExt,
     path::{Path, PathBuf},
@@ -13,8 +13,6 @@ use std::{
 };
 
 impl Repository {
-    // fn get_repo_root() -> PathBuf {}
-
     pub fn new(path: PathBuf) -> Self {
         let root = path.join(".rgit");
         Self {
@@ -23,6 +21,7 @@ impl Repository {
             head_file: root.clone().join("HEAD"),
             log_head: root.clone().join("logs/HEAD"),
             logs: root.clone().join("logs/"),
+            branches: root.clone().join("refs/heads/"),
             current_branch: PathBuf::new(),
         }
     }
@@ -39,6 +38,9 @@ impl Repository {
         }
         if !self.log_head.exists() {
             return Err(RgitError::NotInitialized(String::from("logs/HEAD")));
+        }
+        if !self.branches.exists() {
+            return Err(RgitError::NotInitialized(String::from("refs/heads")));
         }
         let current_branch = fs::read_to_string(self.head_file.as_path())?;
         self.current_branch = PathBuf::from(current_branch);
@@ -68,16 +70,17 @@ impl Repository {
                 fs::create_dir(refs_dir.as_path())?;
 
                 // Create refs/heads
-                let refs_heads = refs_dir.join("heads/");
-                fs::create_dir(refs_heads.as_path())?;
+                fs::create_dir(self.branches.as_path())?;
 
                 // Create HEAD
                 let mut head = fs::OpenOptions::new()
                     .create(true)
                     .append(true)
                     .open(self.head_file.as_path())?;
+
                 let _ = head.write(
-                    refs_heads
+                    self.branches
+                        .as_path()
                         .join(constants::DEFAULT_BRANCH)
                         .as_os_str()
                         .as_bytes(),
@@ -114,7 +117,7 @@ impl Repository {
     pub fn commit(&self, message: String) -> Result<(), RgitError> {
         let n = Utils::next_snapshot_index()? + 1;
         Utils::copy_dir(
-            Path::new("workdir"),
+            Path::new(constants::WORKDIR),
             self.objects.join(format!("snap-{}", n)).as_path(),
         )?;
         let timestamp = SystemTime::now()
@@ -150,6 +153,72 @@ impl Repository {
                 );
             }
         }
+        Ok(())
+    }
+
+    pub fn branch(&self, name: String) -> Result<(), RgitError> {
+        let target_branch = self.branches.join(name.clone());
+        if target_branch.exists() {
+            return Err(RgitError::BranchAlreadyExists(name));
+        }
+
+        let mut branch_ref = OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(target_branch.as_path())?;
+
+        let mut logs_head = OpenOptions::new()
+            .create(false)
+            .append(true)
+            .open(self.log_head.as_path())?;
+        logs_head.write_all(format!("Created branch: {name}").as_bytes())?;
+
+        OpenOptions::new()
+            .create(true)
+            .truncate(true)
+            .write(true)
+            .open(self.logs.as_path().join(format!("refs/heads/{name}")))?;
+
+        let current_commit = fs::read_to_string(self.current_branch.as_path())?;
+        branch_ref.write_all(current_commit.as_bytes())?;
+
+        println!("Created branch: {name}");
+        Ok(())
+    }
+
+    pub fn checkout(&self, name: String) -> Result<(), RgitError> {
+        let target_branch = self.branches.join(name.clone());
+        if !target_branch.exists() {
+            return Err(RgitError::BranchNotFound(name));
+        }
+
+        let snap_name = fs::read_to_string(target_branch.as_path())?;
+        let snap_name = snap_name.trim();
+
+        let workdir = Path::new(constants::WORKDIR);
+        if !snap_name.is_empty() {
+            let snap = self.objects.as_path().join(snap_name);
+            if !snap.exists() {
+                return Err(RgitError::CommitNotFound);
+            }
+            fs::remove_dir_all(workdir)?;
+            Utils::copy_dir(snap.as_path(), workdir)?;
+        }
+
+        let mut head = OpenOptions::new()
+            .create(false)
+            .write(true)
+            .truncate(true)
+            .open(self.head_file.as_path())?;
+        head.write_all(target_branch.as_path().as_os_str().as_bytes())?;
+
+        let mut logs_head = OpenOptions::new()
+            .create(false)
+            .append(true)
+            .open(self.log_head.as_path())?;
+        logs_head.write_all(format!("Checkout branch: {name}").as_bytes())?;
+
         Ok(())
     }
 }

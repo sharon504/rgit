@@ -17,6 +17,12 @@ pub enum Commands {
         #[arg(short, long)]
         message: String,
     },
+    Branch {
+        name: String,
+    },
+    Checkout {
+        name: String,
+    },
 }
 
 #[derive(Parser)]
@@ -56,6 +62,16 @@ fn main() {
                 Commands::Log => {
                     if let Err(err) = repo.log() {
                         eprintln!("{}", err)
+                    }
+                }
+                Commands::Branch { name } => {
+                    if let Err(e) = repo.branch(name) {
+                        eprintln!("{}", e);
+                    }
+                }
+                Commands::Checkout { name } => {
+                    if let Err(e) = repo.checkout(name) {
+                        eprint!("{e}");
                     }
                 }
                 _ => unreachable!(),

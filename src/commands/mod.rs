@@ -10,5 +10,6 @@ pub struct Repository {
     pub head_file: PathBuf,
     pub log_head: PathBuf,
     pub logs: PathBuf,
+    pub branches: PathBuf,
     pub current_branch: PathBuf,
 }
