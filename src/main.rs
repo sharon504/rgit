@@ -22,6 +22,10 @@ pub enum Commands {
     Tag {
         name: String,
     },
+    Config {
+        key: String,
+        value: Option<String>,
+    },
 }
 
 #[derive(Parser)]
@@ -76,6 +80,11 @@ fn main() {
                 Commands::Tag { name } => {
                     if let Err(e) = repo.tag(name) {
                         eprintln!("{e}");
+                    }
+                }
+                Commands::Config { key, value } => {
+                    if let Err(e) = repo.config(key, value) {
+                        eprintln!("{e}")
                     }
                 }
                 _ => unreachable!(),
