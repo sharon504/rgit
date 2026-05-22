@@ -36,6 +36,21 @@ impl RefOps {
         }
     }
 
+    /// Get the latest commit hash in branch
+    pub fn get_current_commit_hash(repo: &Repository) -> Result<String, RgitError> {
+        if !repo.current_branch.exists() {
+            FsOps::create_file_with_content(
+                repo.current_branch.as_path(),
+                "0".repeat(40).as_bytes(),
+            )?;
+        }
+        let mut current_hash = FsOps::read_file(repo.current_branch.as_path())?;
+        if current_hash.is_empty() {
+            current_hash = "0".repeat(40);
+        }
+        Ok(current_hash)
+    }
+
     /// Read the current branch from HEAD file
     pub fn read_current_branch(repo: &mut Repository) -> Result<(), RgitError> {
         let current_branch = FsOps::read_file(repo.head_file.as_path())?;

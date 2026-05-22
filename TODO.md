@@ -37,10 +37,10 @@
 
 ## Phase 04 — SHA1 Naming
 
-- [ ] Add `sha1` or `sha2` crate
-- [ ] Hash `author + date + parent_sha + message` to get the snapshot name
-- [ ] Replace sequential `snapshot-N` naming with the SHA1 hex everywhere
-- [ ] Update branches and tags files to reference SHAs
+- [x] Add `sha1` or `sha2` crate
+- [x] Hash `author + date + parent_sha + message` to get the snapshot name
+- [x] Replace sequential `snapshot-N` naming with the SHA1 hex everywhere
+- [x] Update branches and tags files to reference SHAs
 
 ---
 
