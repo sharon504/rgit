@@ -1,9 +1,5 @@
-mod commands;
-mod core;
-mod errors;
-
 use clap::{Parser, Subcommand};
-use commands::Repository;
+use rgit_lib::commands::Repository;
 use std::path::PathBuf;
 
 #[derive(Subcommand)]
@@ -21,6 +17,9 @@ pub enum Commands {
         name: String,
     },
     Checkout {
+        name: String,
+    },
+    Tag {
         name: String,
     },
 }
@@ -72,6 +71,11 @@ fn main() {
                 Commands::Checkout { name } => {
                     if let Err(e) = repo.checkout(name) {
                         eprint!("{e}");
+                    }
+                }
+                Commands::Tag { name } => {
+                    if let Err(e) = repo.tag(name) {
+                        eprintln!("{e}");
                     }
                 }
                 _ => unreachable!(),
