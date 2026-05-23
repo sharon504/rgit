@@ -37,6 +37,13 @@ impl Config {
         })
     }
 
+    pub fn new(user_name: &str, user_email: &str) -> Self {
+        Self {
+            _user_name: user_name.to_string(),
+            _user_email: user_email.to_string(),
+        }
+    }
+
     pub fn set(&self, file: &Path) -> Result<(), RgitError> {
         let mut conf = Ini::new();
         conf.with_section(Some("User"))
